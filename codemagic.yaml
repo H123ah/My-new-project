@@ -1,0 +1,46 @@
+workflows:
+  flutter-workflow:
+    name: Flutter Workflow
+    max_build_duration: 60 # Duration in minutes, adjust if needed
+    environment:
+      vars:
+        FLUTTER_CHANNEL: stable
+        # Add other environment variables as needed
+    scripts:
+      # Install dependencies
+      - name: Install dependencies
+        script: |
+          flutter pub get
+
+      # Run tests
+      - name: Run tests
+        script: |
+          flutter test
+
+      # Build APK for Android
+      - name: Build APK
+        script: |
+          flutter build apk --release
+
+      # Build IPA for iOS
+      - name: Build IPA
+        script: |
+          flutter build ios --release --no-codesign
+
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+      - build/ios/iphoneos/Runner.app
+
+    caching:
+      cache:
+        paths:
+          - .pub-cache
+          - build
+
+    # Optional deployment steps
+    deploy:
+      # Example: Deploy to Firebase App Distribution
+      - name: Publish to Firebase App Distribution
+        script: |
+          firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk --app YOUR_FIREBASE_APP_ID --token $FIREBASE_TOKEN
+          firebase appdistribution:distribute build/ios/iphoneos/Runner.app --app YOUR_FIREBASE_APP_ID --token $FIREBASE_TOKEN
